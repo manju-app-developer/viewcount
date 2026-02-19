@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>My YouTube Tracker</title>
+    <script>
+        // On page load, check if we already have a saved URL
+        window.onload = function () {
+            const savedUrl = localStorage.getItem('myTrackedUrl');
+            const urlParams = new URLSearchParams(window.location.search);
+
+            // If we have a saved URL but it's not in the address bar, redirect to show data
+            if (savedUrl && !urlParams.has('url')) {
+                window.location.href = "/?url=" + encodeURIComponent(savedUrl);
+            }
+        };
+
+        function saveAndSubmit(event) {
+            const urlInput = document.getElementById('youtube_url').value;
+            localStorage.setItem('myTrackedUrl', urlInput);
+        }
+
+        function clearTracker() {
+            localStorage.removeItem('myTrackedUrl');
+            window.location.href = "/";
+        }
+    </script>
+</head>
+
+<body>
+    <h1>YouTube View Tracker</h1>
+
+    <div id="setup-section">
+        <form action="/add" method="post" onsubmit="saveAndSubmit()">
+            <input type="text" id="youtube_url" name="url" placeholder="Paste YouTube URL" required>
+            <button type="submit">Start Tracking</button>
+        </form>
+    </div>
+
+    <hr>
+
+    {% if current_url %}
+    <h2>Tracking: {{ current_url }}</h2>
+    <button onclick="clearTracker()">Track a Different Video</button>
+    <a href="/export?url={{ current_url }}"><button>Download Excel</button></a>
+
+    <table border="1" style="margin: 20px auto; width: 80%;">
+        <tr>
+            <th>Time</th>
+            <th>Views</th>
+        </tr>
+        {% for log in logs %}
+        <tr>
+            <td>{{ log.Time }}</td>
+            <td>{{ log.Views }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    <p>Enter a URL above to start seeing data.</p>
+    {% endif %}
+</body>
+
+</html>
